@@ -8,12 +8,14 @@ public class Server{
 
     public static void main(String[] args) throws IOException {
         Map<String, String> clients = new HashMap<>();
-        ServerSocket ss = new ServerSocket(9999);
+        ServerSocket ss = new ServerSocket(999);
         Socket cs;
 
         while(true){
             cs = ss.accept();
-            (new Thread(new ClientHandler(cs, clients))).start();
+
+            Thread t = new Thread(new ClientHandler(cs, clients));
+            t.start();
         }
 
     }
