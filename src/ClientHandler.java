@@ -1,17 +1,18 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Map;
+import java.util.List;
 
 public class ClientHandler implements Runnable{
     private Socket cs;
     private PrintWriter out;
     private BufferedReader in;
-    private Map<String, String> clients;
+    private Map<String, Utilizador> clients;
 
     private String active_user; // Coloquei isto porque quem trata do utilizador tem que saber qual ele é e isso só acontece apos o login
 
 
-    public ClientHandler(Socket cs, Map<String, String> clients) {
+    public ClientHandler(Socket cs, Map<String, Utilizador> clients) {
         this.cs = cs;
         this.clients = clients;
     }
@@ -116,21 +117,23 @@ public class ClientHandler implements Runnable{
         System.out.println("Login feito como: " + active_user);
     }
 
-
+// é preciso lock no log in?
     private int logIn(String user, String pw){
+		Utilizador util;
         synchronized (clients){
-            if(this.clients.containsKey(user) && this.clients.get(user).equals(pw)){
-                this.active_user = user;
-                return 1;
-            }
+            if(this.clients.containsKey(user) && this.clients.get(user).authenticate(pw)){
+                		this.active_user = user;
+						return 1;
+			}
         }
+		out.println("Credenciais não batem certo.");
         return 0;
     }
 
     private int registerClient(String user, String pw) {
         synchronized (clients){
             if(!this.clients.containsKey(user)){
-                this.clients.put(user, pw);
+                this.clients.put(user,new Utilizador(user,pw));
                 return 1;
             }
         }

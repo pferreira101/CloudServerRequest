@@ -7,7 +7,7 @@ import java.util.*;
 public class Server{
 
     public static void main(String[] args) throws IOException {
-        Map<String, String> clients = new HashMap<>();
+        Map<String, Utilizador> clients = new HashMap<>();
         ServerSocket ss = new ServerSocket(999);
         Socket cs;
 
