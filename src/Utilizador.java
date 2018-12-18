@@ -1,10 +1,12 @@
 import java.util.concurrent.locks.*;
+import java.util.*;
 
 public class Utilizador {
 	private final String username;
 	private String password;
 	private double divida;
 	private Lock l;
+	private List<String> servidores;
 
 	/**
 		Construtor da class Utilizador
@@ -17,6 +19,7 @@ public class Utilizador {
 		this.username = username;
 		this.password = password;
 		this.divida = 0.0;
+		this.servidores = new ArrayList<>();
 		this.l = new ReentrantLock();
 	}
 
@@ -72,5 +75,32 @@ public class Utilizador {
 			this.divida += value;
 		}
 		finally{l.unlock();}
+	}
+
+	public void addServidor(String str){
+		try{
+			l.lock();
+			this.servidores.add(str);
+		}
+		finally{l.unlock();}
+	}
+
+	public void removeServidor(String str){
+		try{
+			l.lock();
+			this.servidores.remove(str);
+		}
+		finally{l.unlock();}
+	}
+
+	public boolean donoServidor(String str){
+		boolean b = false;
+		try{
+			l.lock();
+			b = this.servidores.contains(str);
+		}
+		finally{l.unlock();}
+
+		return b;
 	}
 }

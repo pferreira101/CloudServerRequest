@@ -8,13 +8,15 @@ public class ClientHandler implements Runnable{
     private PrintWriter out;
     private BufferedReader in;
     private Map<String, Utilizador> clients;
+	private ServerManagement servers_typ1;
 
     private String active_user; // Coloquei isto porque quem trata do utilizador tem que saber qual ele é e isso só acontece apos o login
 
 
-    public ClientHandler(Socket cs, Map<String, Utilizador> clients) {
+    public ClientHandler(Socket cs, Map<String, Utilizador> clients,ServerManagement s1) {
         this.cs = cs;
         this.clients = clients;
+		this.servers_typ1 = s1;
     }
 
     public void run(){
@@ -128,12 +130,12 @@ public class ClientHandler implements Runnable{
 
 				switch(v_leitura){
 					case 1: {
-						//comprar servidor
+						this.adquirirServer();
 						break;
 					}
 
 					case 2: {
-						//licitar pelo servidor
+						this.libertar();
 						break;
 					}
 
@@ -194,6 +196,39 @@ public class ClientHandler implements Runnable{
                 out.println("1 - Reservar servidor | 2 - Libertar servidor | 3 - Consultar divida | 4 - Sair");
         }
     }
+
+	private Utilizador getUser(String str){
+		Utilizador user;
+		synchronized (clients){
+			user = clients.get(str);
+		}
+		return user;
+	}
+
+	private void adquirirServer(){
+		Utilizador user = this.getUser(this.active_user);
+		String msg = servers_typ1.adquirir(10);
+		user.addServidor(msg); // tem lock dentro da class
+		out.println("Sou o rei comprei este fdp: " + msg);
+	}
+
+	private void libertar(){
+		Utilizador user = this.getUser(this.active_user);
+		try{
+			String msg = in.readLine();
+
+			if (user.donoServidor(msg)){
+				double price = servers_typ1.libertar(msg);
+				user.removeServidor(msg);
+				user.addDivida(price);
+				out.println("Libertei por: " + price);
+			}
+			else {
+				out.println("Não és dono do server: " + msg);
+			}
+		}
+		catch(IOException e){}
+	}
 
 	private double divida_value(String user){
 		Utilizador util;
