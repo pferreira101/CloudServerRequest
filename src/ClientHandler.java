@@ -32,13 +32,11 @@ public class ClientHandler implements Runnable{
 
             if(check == 1) {
                 int menu = 0;
-                showOps(menu);
-                while ((msg = in.readLine()) != null) {
-                    // processar a mensagem recebida
-                    process(msg);
-                }
+				System.out.println("Login feito como: " + active_user);
+				this.after_authentication();
             }
 
+			System.out.println("Disconnected -> " + active_user); // no cliente as threads continuam a correr.
             in.close();
             out.close();
             cs.close();
@@ -117,13 +115,63 @@ public class ClientHandler implements Runnable{
         System.out.println("Login feito como: " + active_user);
     }
 
-// é preciso lock no log in?
+	private void after_authentication() throws IOException {
+		showOps(0);
+		int opt = -1, v_leitura = -1;
+		String msg;
+
+
+		while(opt == -1){
+			try{
+				msg = in.readLine();
+				v_leitura = Integer.parseInt(msg);
+
+				switch(v_leitura){
+					case 1: {
+						//comprar servidor
+						break;
+					}
+
+					case 2: {
+						//licitar pelo servidor
+						break;
+					}
+
+					case 3: {
+						out.println("Valor da dívida -> " + this.divida_value(active_user));
+						break;
+					}
+
+					case 4:{
+						break;
+					}
+
+					default:{
+						out.println("Insira um dígito válido.\n");
+						v_leitura = -1;
+						break;
+					}
+				}
+			}
+			catch (NumberFormatException e){
+                out.println("Input inválido. Insira um dígito.\n");
+            }
+
+			opt = v_leitura;
+		}
+
+		if (opt != 4){
+			this.after_authentication();
+		}
+	}
+
+// é preciso lock no log in? lock no user?
     private int logIn(String user, String pw){
 		Utilizador util;
         synchronized (clients){
             if(this.clients.containsKey(user) && this.clients.get(user).authenticate(pw)){
-                		this.active_user = user;
-						return 1;
+                this.active_user = user;
+				return 1;
 			}
         }
 		out.println("Credenciais não batem certo.");
@@ -143,7 +191,22 @@ public class ClientHandler implements Runnable{
     void showOps(int menu){
         switch (menu){
             case 0:
-                out.println("1 - Comprar servidor | 2 - Libertar servidor | 3 - Consultar divida");
+                out.println("1 - Reservar servidor | 2 - Libertar servidor | 3 - Consultar divida | 4 - Sair");
         }
     }
+
+	private double divida_value(String user){
+		Utilizador util;
+		double value = -1;
+
+		synchronized (clients) {
+			util = clients.get(user);
+		}
+
+		if (util != null){
+			value = util.getDivida();
+		}
+
+		return value;
+	}
 }
