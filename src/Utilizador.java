@@ -77,6 +77,13 @@ public class Utilizador {
 		finally{l.unlock();}
 	}
 
+	/**
+		Método para adicionar um serdidor ao utilizador
+
+		@param str Nome do servidor a inserir.
+
+	*/
+
 	public void addServidor(String str){
 		try{
 			l.lock();
@@ -85,6 +92,13 @@ public class Utilizador {
 		finally{l.unlock();}
 	}
 
+	/**
+		Método para remover um serdidor ao utilizador
+
+		@param str Nome do servidor a remover.
+
+	*/
+
 	public void removeServidor(String str){
 		try{
 			l.lock();
@@ -92,6 +106,13 @@ public class Utilizador {
 		}
 		finally{l.unlock();}
 	}
+
+	/**
+		Método que verifica se o utilizador é dono de um servidor.
+
+		@param str Nome do servidor a remover.
+
+	*/
 
 	public boolean donoServidor(String str){
 		boolean b = false;

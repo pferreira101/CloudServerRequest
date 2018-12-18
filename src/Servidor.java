@@ -18,6 +18,13 @@ public class Servidor{
 		this.atual_owner = "";
 	}
 
+	/**
+		Método alterar o estado do servidor para livre.
+
+		@return Valor a pagar
+
+	*/
+
 	public double changeStatus(){
 		double paying = 0;
 		try{
@@ -30,6 +37,14 @@ public class Servidor{
 		return paying;
 	}
 
+	/**
+		Método get para o valor do status.
+
+		@return Valor do status.
+
+	*/
+
+
 	public int getStatus(){
 		int status = -1;
 		try{
@@ -41,6 +56,14 @@ public class Servidor{
 		return status;
 	}
 
+	/**
+		Método reservar o servidor.
+
+		@param price Valor do aluguer.
+
+	*/
+
+
 	public void buyServer(double price){
 		try{
 			l.lock();
@@ -49,6 +72,13 @@ public class Servidor{
 		}
 		finally{l.unlock();}
 	}
+
+	/**
+		Método get para o id do servidor.
+
+		@return Id do servidor.
+
+	*/
 
 	public String getId(){
 		return this.id;
