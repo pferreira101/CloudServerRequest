@@ -1,20 +1,26 @@
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.locks.*;
 import java.util.Map;
 
-public class ServerManagement {
+public class ServerTypeManager{
 
 	private Condition livre;
 	private Lock l;
+	private String type;
 	private int n_servidores_livres;
 	private int n_servidores_leilões;
-	private Map<String,Servidor> servers;
+	private Map<String, Servidor> servers;
+	private Queue<Licitacao> queue;
 
-	public ServerManagement(Map<String,Servidor> servers,int size){
+	public ServerTypeManager(Map<String, Servidor> servers, String type, int size){
 		this.l = new ReentrantLock();
 		this.livre = this.l.newCondition();
 		this.n_servidores_livres = size;
 		this.n_servidores_leilões = 0;
 		this.servers = servers;
+		this.type = type;
+		this.queue = new PriorityQueue<>();
 	}
 
 	public double libertar(String n_server){
@@ -23,7 +29,7 @@ public class ServerManagement {
 		try{
 			l.lock();
 			server_to_free = this.servers.get(n_server);
-			price = server_to_free.changeStatus();
+			price = server_to_free.freeServer();
 			this.n_servidores_livres++;
 			livre.signalAll();
 		}
@@ -51,11 +57,17 @@ public class ServerManagement {
 			}
 
 			server.buyServer(price);
-			server_id = server.getId();
+			server_id = server.getID();
 		}
 		catch(InterruptedException e){}
-		finally{l.unlock();}
+		finally{
+			l.unlock();
+		}
 
 		return server_id;
+	}
+
+	public String getType(){
+		return this.type;
 	}
 }

@@ -1,22 +1,20 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Map;
-import java.util.List;
 
 public class ClientHandler implements Runnable{
     private Socket cs;
     private PrintWriter out;
     private BufferedReader in;
     private Map<String, Utilizador> clients;
-	private ServerManagement servers_typ1;
-
+	private Map<String, ServerTypeManager> stm;
     private String active_user; // Coloquei isto porque quem trata do utilizador tem que saber qual ele é e isso só acontece apos o login
 
 
-    public ClientHandler(Socket cs, Map<String, Utilizador> clients,ServerManagement s1) {
+    public ClientHandler(Socket cs, Map<String, Utilizador> clients, Map<String, ServerTypeManager> stm) {
         this.cs = cs;
         this.clients = clients;
-		this.servers_typ1 = s1;
+		this.stm = stm;
     }
 
     public void run(){
@@ -34,11 +32,11 @@ public class ClientHandler implements Runnable{
 
             if(check == 1) {
                 int menu = 0;
-				System.out.println("Login feito como: " + active_user);
+				System.out.println("Login feito como: " + this.active_user);
 				this.after_authentication();
             }
 
-			System.out.println("Disconnected -> " + active_user); // no cliente as threads continuam a correr.
+			System.out.println("Disconnected -> " + this.active_user); // no cliente as threads continuam a correr.
             in.close();
             out.close();
             cs.close();
@@ -64,7 +62,7 @@ public class ClientHandler implements Runnable{
             try{
                 opt = Integer.parseInt(msg);
                 String user;
-                String pw; // declarei estes dois aqui porque dentro do switch nao dava idkw
+                String pw;
 
                 switch(opt) {
                     case 1:
@@ -122,7 +120,6 @@ public class ClientHandler implements Runnable{
 		int opt = -1, v_leitura = -1;
 		String msg;
 
-
 		while(opt == -1){
 			try{
 				msg = in.readLine();
@@ -130,7 +127,10 @@ public class ClientHandler implements Runnable{
 
 				switch(v_leitura){
 					case 1: {
-						this.adquirirServer();
+						showOps(1);
+						msg = in.readLine();
+						int x = Integer.parseInt(msg);
+						if(x != 0) processaReserva(x);
 						break;
 					}
 
@@ -140,7 +140,7 @@ public class ClientHandler implements Runnable{
 					}
 
 					case 3: {
-						out.println("Valor da dívida -> " + this.divida_value(active_user));
+						out.println("Valor da dívida -> " + this.dividaValue(active_user));
 						break;
 					}
 
@@ -194,6 +194,10 @@ public class ClientHandler implements Runnable{
         switch (menu){
             case 0:
                 out.println("1 - Reservar servidor | 2 - Libertar servidor | 3 - Consultar divida | 4 - Sair");
+                break;
+
+            case 1:
+                out.println("Tipo: 1 - Fast | 2 - Medium | 3 - Large");
         }
     }
 
@@ -205,9 +209,10 @@ public class ClientHandler implements Runnable{
 		return user;
 	}
 
-	private void adquirirServer(){
+	private void adquirirServer(double price, String type){
 		Utilizador user = this.getUser(this.active_user);
-		String msg = servers_typ1.adquirir(10);
+		ServerTypeManager s = this.stm.get(type);
+		String msg = s.adquirir(price);
 		user.addServidor(msg); // tem lock dentro da class
 		out.println("Sou o rei comprei este fdp: " + msg);
 	}
@@ -218,7 +223,7 @@ public class ClientHandler implements Runnable{
 			String msg = in.readLine();
 
 			if (user.donoServidor(msg)){
-				double price = servers_typ1.libertar(msg);
+				double price = 0;//.libertar(msg); VER COMO FICA ISTO
 				user.removeServidor(msg);
 				user.addDivida(price);
 				out.println("Libertei por: " + price);
@@ -230,18 +235,51 @@ public class ClientHandler implements Runnable{
 		catch(IOException e){}
 	}
 
-	private double divida_value(String user){
-		Utilizador util;
+	private double dividaValue(String user){
+		Utilizador u;
 		double value = -1;
 
 		synchronized (clients) {
-			util = clients.get(user);
+			u = clients.get(user);
 		}
 
-		if (util != null){
-			value = util.getDivida();
+		if (u != null){
+			value = u.getDivida();
 		}
 
 		return value;
 	}
+
+
+    /**
+     * Função que processa a reserva de um servidor
+     * @param x opção escolhida pelo utilizador para o tipo de servidor
+     * @throws IOException
+     */
+	public void processaReserva(int x) throws IOException {
+        String opt;
+        int op;
+        String server_type;
+        double server_price;
+
+        if(x == 1){server_type = "fast"; server_price = 10.0;}
+        else if (x == 2){server_type = "medium"; server_price = 7.5;}
+        else{server_type = "large"; server_price = 5;}
+
+
+        out.println("Deseja reservar: 1 - Preço base ("+server_price+") | 2 - Preço para leilão");
+
+        opt = in.readLine();
+        op = Integer.parseInt(opt);
+
+        if(op == 2){
+            out.println("Valor: ");
+            opt = in.readLine();
+            int value = Integer.parseInt(opt);
+
+            adquirirServer(value, server_type);
+        }
+        else adquirirServer(server_price, server_type);
+
+    }
 }
