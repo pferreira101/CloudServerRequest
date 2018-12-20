@@ -112,7 +112,7 @@ public class ClientHandler implements Runnable{
 
     // conforme a mensagem recebida fazer coisas (?)
     private void process(String msg) {
-        System.out.println("Login feito como: " + active_user);
+        System.out.println("Logged In -> " + active_user);
     }
 
 	private void after_authentication() throws IOException {
@@ -135,12 +135,17 @@ public class ClientHandler implements Runnable{
 					}
 
 					case 2: {
-						this.libertar();
+                        if(getUser(this.active_user).getOwnedServers() != "") { // FIXME: 12/20/2018 não está a funcionar
+					        showOps(2);
+                            String server_id = in.readLine();
+                            this.libertarServidor(server_id);
+                        }
+                        else out.println("Não possui nenhum servidor.");
 						break;
 					}
 
 					case 3: {
-						out.println("Valor da dívida -> " + this.dividaValue(active_user));
+						out.println("Valor da dívida = " + this.getDividaUser());
 						break;
 					}
 
@@ -176,14 +181,14 @@ public class ClientHandler implements Runnable{
 				return 1;
 			}
         }
-		out.println("Credenciais não batem certo.");
+		out.println("Credenciais incorretas.");
         return 0;
     }
 
     private int registerClient(String user, String pw) {
         synchronized (clients){
             if(!this.clients.containsKey(user)){
-                this.clients.put(user,new Utilizador(user,pw));
+                this.clients.put(user, new Utilizador(user, pw));
                 return 1;
             }
         }
@@ -198,49 +203,59 @@ public class ClientHandler implements Runnable{
 
             case 1:
                 out.println("Tipo: 1 - Fast | 2 - Medium | 3 - Large");
+                break;
+            case 2:
+                Utilizador u = getUser(this.active_user);
+                out.println("Servidor a remover: " + u.getOwnedServers());
+                break;
         }
     }
 
 	private Utilizador getUser(String str){
 		Utilizador user;
-		synchronized (clients){
+		synchronized (this.clients){
 			user = clients.get(str);
 		}
 		return user;
 	}
 
-	private void adquirirServer(double price, String type){
+	private void adquirirServidor(double price, String type){
 		Utilizador user = this.getUser(this.active_user);
 		ServerTypeManager s = this.stm.get(type);
-		String msg = s.adquirir(price);
-		user.addServidor(msg); // tem lock dentro da class
-		out.println("Sou o rei comprei este fdp: " + msg);
+		String server_id = s.adquirir(price);
+
+		user.addServidor(server_id); // tem lock dentro da class
+
+		out.println("Servidor adquirido: " + server_id);
 	}
 
-	private void libertar(){
+	private void libertarServidor(String server_id){
 		Utilizador user = this.getUser(this.active_user);
-		try{
-			String msg = in.readLine();
 
-			if (user.donoServidor(msg)){
-				double price = 0;//.libertar(msg); VER COMO FICA ISTO
-				user.removeServidor(msg);
-				user.addDivida(price);
-				out.println("Libertei por: " + price);
-			}
-			else {
-				out.println("Não és dono do server: " + msg);
-			}
-		}
-		catch(IOException e){}
-	}
+        if (user.donoServidor(server_id)){
+            double price = getServerSMT(server_id).libertar(server_id);
 
-	private double dividaValue(String user){
+            user.removeServidor(server_id);
+            user.addDivida(price);
+
+            out.println("Servidor libertado. Aumento da dívida em: " + price);
+        }
+        else {
+            out.println("Não és dono do servidor: " + server_id);
+        }
+    }
+
+
+    /**
+     * Método que retorna a dívida do utilizador
+     * @return dívida
+     */
+	private double getDividaUser(){
 		Utilizador u;
 		double value = -1;
 
-		synchronized (clients) {
-			u = clients.get(user);
+		synchronized (this.clients) {
+			u = clients.get(this.active_user);
 		}
 
 		if (u != null){
@@ -267,7 +282,7 @@ public class ClientHandler implements Runnable{
         else{server_type = "large"; server_price = 5;}
 
 
-        out.println("Deseja reservar: 1 - Preço base ("+server_price+") | 2 - Preço para leilão");
+        out.println("Deseja reservar: 1 - Preço base (" + server_price + ") | 2 - Preço para leilão");
 
         opt = in.readLine();
         op = Integer.parseInt(opt);
@@ -277,9 +292,21 @@ public class ClientHandler implements Runnable{
             opt = in.readLine();
             int value = Integer.parseInt(opt);
 
-            adquirirServer(value, server_type);
+            adquirirServidor(value, server_type);
         }
-        else adquirirServer(server_price, server_type);
+        else adquirirServidor(server_price, server_type);
 
+    }
+
+
+    /**
+     * Função que retorna o objeto da classe ServerTypeManager correspondente ao id de um servidor.
+     * @param server_id id do servidor
+     * @return ServerTypeManager correspondente
+     */
+    public ServerTypeManager getServerSMT(String server_id){
+	    String server_type = (server_id.split("\\."))[0];
+
+	    return this.stm.get(server_type);
     }
 }

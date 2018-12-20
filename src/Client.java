@@ -4,32 +4,74 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+
+class Reader implements Runnable{
+	Socket cs;
+	BufferedReader in;
+
+	public Reader(Socket cs){
+		this.cs = cs;
+	}
+
+	public void run(){
+
+		String msg;
+
+		try{
+			this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
+			while((msg = this.in.readLine()) != null){
+				System.out.println(msg);
+			}
+		}
+		catch(IOException e){}
+	}
+}
+
+class Writer implements Runnable{
+	Socket cs;
+	PrintWriter out;
+
+	public Writer(Socket cs){
+		this.cs = cs;
+	}
+
+	public void run(){
+
+		try{
+			this.out = new PrintWriter(cs.getOutputStream(), true);
+			BufferedReader sys_in = new BufferedReader(new InputStreamReader(System.in));
+			String msg;
+
+			while((msg = sys_in.readLine()) != null){
+				out.println(msg);
+			}
+			sys_in.close();
+		}
+		catch (IOException e){
+		}
+
+		out.close();
+
+	}
+}
+
+
 public class Client {
     public static void main(String args[]) throws IOException {
 
         Socket cs = new Socket("127.0.0.1", 999);
 
-        PrintWriter out = new PrintWriter(cs.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
-
-        BufferedReader sys_in = new BufferedReader(new InputStreamReader(System.in)); // para ler do teclado
-
-        String welcome = in.readLine(); // foi um teste xD
-        System.out.println(welcome);
 
         int active = 1;
 
-        while(active == 1){ // ter uma resposta especifica para cancelar a ligacao
-            String msg = in.readLine();
-            System.out.println(msg); // recebo a mensagem do Handler e imprimo
+		Thread t = new Thread(new Reader(cs));
+		Thread t1 = new Thread(new Writer(cs));
+		t.start();
+		t1.start();
 
-            String reply = sys_in.readLine(); // leio a mensagem do teclado
-            out.println(reply); // envio para o handler
+        while(true){
         }
 
-        in.close();
-        out.close();
-        sys_in.close();
-        cs.close();
+        //cs.close();
     }
 }

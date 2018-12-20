@@ -87,14 +87,17 @@ public class Utilizador {
 
 	/**
 		Método para remover um serdidor ao utilizador
-		@param str Nome do servidor a remover.
+		@param server_id Nome do servidor a remover.
 	*/
-	public void removeServidor(String str){
+	public void removeServidor(String server_id){
 		try{
 			l.lock();
-			this.servidores.remove(str);
+			this.servidores.remove(server_id);
+
 		}
-		finally{l.unlock();}
+		finally{
+			l.unlock();
+		}
 	}
 
 	/**
@@ -113,5 +116,14 @@ public class Utilizador {
 		}
 
 		return b;
+	}
+
+
+	public String getOwnedServers(){
+		StringBuilder r = new StringBuilder();
+		for(String s : this.servidores){
+			r.append(s + " | ");
+		}
+		return r.toString();
 	}
 }

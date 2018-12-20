@@ -1,7 +1,5 @@
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.locks.*;
-import java.util.Map;
 
 public class ServerTypeManager{
 
@@ -67,7 +65,21 @@ public class ServerTypeManager{
 		return server_id;
 	}
 
+
+    /**
+     * Método que retorna o tipo do
+     * @return
+     */
 	public String getType(){
 		return this.type;
+	}
+
+
+    /**
+     * Método que retorna todos os servidores ligados ao SMT
+     * @return lista dos servidores
+     */
+	public Collection<Servidor> getServers(){
+		return this.servers.values();
 	}
 }

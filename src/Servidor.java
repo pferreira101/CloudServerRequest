@@ -74,4 +74,13 @@ public class Servidor{
 		return this.id;
 	}
 
+
+	/**
+	 * Getter do preço do servidor
+	 * @return preço do servior
+	 */
+	public double getPrice(){
+		return this.price;
+	}
+
 }
