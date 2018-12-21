@@ -1,10 +1,12 @@
 import java.util.concurrent.locks.*;
+import java.time.*;
 
 public class Servidor{
 	private String id;
 	private double price;
 	private int status; // 0 livre 1 ocupado 2 em leilão 3 leiloado
 	private String actual_owner; // dono
+	private LocalDateTime adquirido; // data de aquisição
 	private final String type; // tipo
 	private final Lock l;
 
@@ -16,6 +18,7 @@ public class Servidor{
 		this.type = type;
 		this.price = price;
 		this.actual_owner = "";
+		this.adquirido = null;
 	}
 
 	/**
@@ -26,13 +29,18 @@ public class Servidor{
 		double paying = 0;
 		try{
 			l.lock();
-			paying = this.price;
 			this.status = 0;
+			this.actual_owner = "";
+
+			LocalDateTime libertado=LocalDateTime.now();
+			Duration duration = Duration.between(adquirido,libertado);
+    		double diff = duration.toSeconds();
+
+    		paying = this.price*(diff/120);
 		}
 		finally{
 			l.unlock();
 		}
-
 		return paying;
 	}
 
@@ -57,11 +65,13 @@ public class Servidor{
 		Método reservar o servidor por um preço.
 		@param price Valor do aluguer.
 	*/
-	public void buyServer(double price){
+	public void buyServer(double price, String owner){
 		try{
 			l.lock();
 			this.status = 1;
 			this.price = price;
+			this.actual_owner=owner;
+			this.adquirido = LocalDateTime.now();
 		}
 		finally{l.unlock();}
 	}

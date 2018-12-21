@@ -12,7 +12,9 @@ public class Server{
         Map<String, Utilizador> clients = new HashMap<>();
         Map<String, ServerTypeManager> server_type_manager = new HashMap<>();
 
-        ServerSocket ss = new ServerSocket(999);
+        // Henrique: 
+        ServerSocket ss = new ServerSocket(1025);
+        //ServerSocket ss = new ServerSocket(999);
         Socket cs;
 
         // Criação dos servidores do tipo "fast"

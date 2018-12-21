@@ -32,11 +32,11 @@ public class ServerTypeManager{
 			livre.signalAll();
 		}
 		finally{l.unlock();}
-
+		System.out.println(price);
 		return price;
 	}
 
-	public String adquirir(double price){
+	public String adquirir(double price, String owner){
 		String server_id = "";
 		Servidor server = null;
 		try{
@@ -54,7 +54,7 @@ public class ServerTypeManager{
 				}
 			}
 
-			server.buyServer(price);
+			server.buyServer(price,owner);
 			server_id = server.getID();
 		}
 		catch(InterruptedException e){}

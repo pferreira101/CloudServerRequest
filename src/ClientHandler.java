@@ -222,7 +222,7 @@ public class ClientHandler implements Runnable{
 	private void adquirirServidor(double price, String type){
 		Utilizador user = this.getUser(this.active_user);
 		ServerTypeManager s = this.stm.get(type);
-		String server_id = s.adquirir(price);
+		String server_id = s.adquirir(price,user.getUsername());
 
 		user.addServidor(server_id); // tem lock dentro da class
 

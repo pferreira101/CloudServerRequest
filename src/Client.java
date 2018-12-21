@@ -59,7 +59,9 @@ class Writer implements Runnable{
 public class Client {
     public static void main(String args[]) throws IOException {
 
-        Socket cs = new Socket("127.0.0.1", 999);
+        //Henrique:
+        Socket cs = new Socket("127.0.0.1", 1025);
+        // Socket cs = new Socket("127.0.0.1", 999);
 
 
         int active = 1;
