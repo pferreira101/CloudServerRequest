@@ -48,6 +48,7 @@ public class MyClientHandler implements Runnable{
 			case "RENT": {commandRServer(msg); break;}
 			case "BID" : {commandBServer(msg); break;}
 			default: {this.out.println("Errro"); break;}
+			//falta o disconnect total e tratar das excpetions melhor
 		}
 	}
 
