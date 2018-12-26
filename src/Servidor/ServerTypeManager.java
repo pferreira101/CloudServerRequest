@@ -45,6 +45,8 @@ public class ServerTypeManager{
 		try{
 			l.lock();
 			server_to_free = this.servers.get(n_server);
+			if (server_to_free.getStatus() == 2)
+				this.n_servidores_leiloes--;
 			price = server_to_free.freeServer();
 			this.n_servidores_livres++;
 			this.servidores_livres.add(n_server);
@@ -82,7 +84,7 @@ public class ServerTypeManager{
 			server_id = server.getID();
 			owner.addServidor(server_id);
 		}
-		catch(InterruptedException e){}
+		catch(InterruptedException e){System.out.println(e.getMessage());}
 		finally{
 			l.unlock();
 		}
@@ -117,7 +119,7 @@ public class ServerTypeManager{
 			t.start();
 
 		}
-		catch(InterruptedException e){}
+		catch(InterruptedException e){System.out.println(e.getMessage());}
 		finally{l.unlock();}
 
 		return server_id;
