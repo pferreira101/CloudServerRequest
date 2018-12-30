@@ -19,160 +19,103 @@ public class ClientHandler implements Runnable{
 
     public void run(){
         String msg;
-        int check;
 
         try{
             out = new PrintWriter(cs.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
 
-            out.println("Bem-Vindo!");
-            // Cliente deve fazer LogIn (e registar-se se necessário)
-            check = validateAccess();
+			while((msg = in.readLine()) != null){
+				System.out.println(msg);
+				command(msg);
+			}
 
-
-            if(check == 1) {
-                int menu = 0;
-				System.out.println("Login feito como: " + this.active_user);
-				this.after_authentication();
-            }
-
-			System.out.println("Disconnected -> " + this.active_user); // no cliente as threads continuam a correr.
-            in.close();
-            out.close();
-            cs.close();
 
         } catch (IOException e){
             System.out.println(e.getMessage());
         }
     }
 
-    /*
-    returns
-        1  se autenticação é validada
-        -1 se cliente cancela operação de log in ou registo
-     */
-    private int validateAccess() throws IOException {
-        String msg;
-        int opt=-1, check=-1;
+	private void command(String msg){
+		String [] args = msg.split(";",2);
 
-
-        do{
-            out.println("1 - Log In | 2 - Registar | 0 - Sair"); // tirei \n porque conta como linha nova. so se puser em ciclo a ler cada linha?
-            msg = in.readLine();
-            try{
-                opt = Integer.parseInt(msg);
-                String user;
-                String pw;
-
-                switch(opt) {
-                    case 1:
-                        do{
-                            out.println("User: ");
-                            user = in.readLine();
-                            out.println("Password: ");
-                            pw = in.readLine();
-
-                            check = logIn(user, pw);
-                            if(check == 1) return 1;
-                        } while(check != 1);
-
-                        break;
-                    case 2:
-                        do{
-                            if(check == 0) out.println("Utilizador já existente.");
-                            out.println("User: ");
-                            user = in.readLine();
-                            out.println("Password: ");
-                            pw = in.readLine();
-
-                            check = registerClient(user, pw);
-                        } while(check != 1);
-
-                        break;
-                    case 0:
-                        break;
-                    default: out.println("Insira um dígito válido.\n");
-                }
-
-            }
-            catch (NumberFormatException e){
-                out.println("Input inválido. Insira um dígito.\n");
-            }
-
-
-        }while(opt != 0);
-
-        return -1; // cliente cancela autenticação
-
-
-    }
-
-
-
-
-    // conforme a mensagem recebida fazer coisas (?)
-    private void process(String msg) {
-        System.out.println("Logged In -> " + active_user);
-    }
-
-	private void after_authentication() throws IOException {
-		showOps(0);
-		int opt = -1, v_leitura = -1;
-		String msg;
-
-		while(opt == -1){
-			try{
-				msg = in.readLine();
-				v_leitura = Integer.parseInt(msg);
-
-				switch(v_leitura){
-					case 1: {
-						showOps(1);
-						msg = in.readLine();
-						int x = Integer.parseInt(msg);
-						if(x != 0) processaReserva(x);
-						break;
-					}
-
-					case 2: {
-                        if(getUser(this.active_user).getOwnedServers() != "") { // FIXME: 12/20/2018 não está a funcionar
-					        showOps(2);
-                            String server_id = in.readLine();
-                            this.libertarServidor(server_id);
-                        }
-                        else out.println("Não possui nenhum servidor.");
-						break;
-					}
-
-					case 3: {
-						out.println("Valor da dívida = " + this.getDividaUser());
-						break;
-					}
-
-					case 4:{
-						break;
-					}
-
-					default:{
-						out.println("Insira um dígito válido.\n");
-						v_leitura = -1;
-						break;
-					}
-				}
-			}
-			catch (NumberFormatException e){
-                out.println("Input inválido. Insira um dígito.\n");
-            }
-
-			opt = v_leitura;
-		}
-
-		if (opt != 4){
-			this.after_authentication();
+		switch(args[0]){
+			case "LOGIN": {commandLogin(msg); break;}
+			case "SIGN": {commandSign(msg); break;}
+			case "LOGOUT": {commandLogout(); break;}
+			case "MONEY": {commandMoney(); break;}
+			case "OSERVER": {commandOServer(); break;}
+			case "FREE": {commandFServer(msg); break;}
+			case "RENT": {commandRServer(msg); break;}
+			case "BID" : {commandBServer(msg); break;}
+			default: {this.out.println("Errro"); break;}
+			//falta o disconnect total e tratar das excpetions melhor
 		}
 	}
 
-// é preciso lock no log in? lock no user?
+	private void commandBServer(String msg){
+		String args[] = msg.split(";");
+
+		Utilizador user = this.getUser(this.active_user);
+		ServerTypeManager s = this.stm.get(args[1]);
+		String server_id = s.licitar(Double.parseDouble(args[2]),user,this.out);
+
+		out.println("SERVER AQUIRED: " + server_id);
+
+	}
+
+
+	private void commandFServer(String msg){
+		String[] args = msg.split(";");
+		libertarServidor(args[1]);
+	}
+
+	private void commandOServer(){
+		if (!this.active_user.equals("")){
+			Utilizador u = this.getUser(this.active_user);
+			out.println("OWNED SERVERS: " + u.getOwnedServers());
+		}
+		else{
+			out.println("DENIED");
+		}
+	}
+
+	private void commandLogout(){
+		out.println("USER: " + this.active_user + " -> DISCONNECTED");
+		this.active_user = "";
+	}
+
+	private void commandLogin(String msg){
+		String[] args = msg.split(";");
+
+		int i = logIn(args[1],args[2]);
+		switch (i){
+			case 1: {out.println("GRANTED"); this.active_user = args[1];break;}
+			default: {out.println("DENIED"); break;}
+		}
+	}
+
+	private void commandSign(String msg){
+		String[] args = msg.split(";");
+
+		int i = registerClient(args[1],args[2]);
+		switch (i){
+			case 1: {out.println("USER REGISTED"); break;}
+			default: {out.println("USER ALREADY REGISTED"); break;}
+		}
+	}
+
+	private void commandMoney(){
+		double money;
+		if (this.active_user.equals("")){
+			out.println("DENIED");
+		}
+		else{
+			money = this.getDividaUser();
+			out.println("USER: " + this.active_user + " -> " + money);
+		}
+	}
+
+
     private int logIn(String user, String pw){
 		Utilizador util;
         synchronized (clients){
@@ -181,7 +124,6 @@ public class ClientHandler implements Runnable{
 				return 1;
 			}
         }
-		out.println("Credenciais incorretas.");
         return 0;
     }
 
@@ -195,61 +137,10 @@ public class ClientHandler implements Runnable{
         return 0;
     }
 
-    void showOps(int menu){
-        switch (menu){
-            case 0:
-                out.println("1 - Reservar servidor | 2 - Libertar servidor | 3 - Consultar divida | 4 - Sair");
-                break;
-
-            case 1:
-                out.println("Tipo: 1 - Fast | 2 - Medium | 3 - Large");
-                break;
-            case 2:
-                Utilizador u = getUser(this.active_user);
-                out.println("Servidor a remover: " + u.getOwnedServers());
-                break;
-        }
-    }
-
-	private Utilizador getUser(String str){
-		Utilizador user;
-		synchronized (this.clients){
-			user = clients.get(str);
-		}
-		return user;
-	}
-
-	private void adquirirServidor(double price, String type){
-		Utilizador user = this.getUser(this.active_user);
-		ServerTypeManager s = this.stm.get(type);
-		String server_id = s.adquirir(price,user.getUsername());
-
-		user.addServidor(server_id); // tem lock dentro da class
-
-		out.println("Servidor adquirido: " + server_id);
-	}
-
-	private void libertarServidor(String server_id){
-		Utilizador user = this.getUser(this.active_user);
-
-        if (user.donoServidor(server_id)){
-            double price = getServerSMT(server_id).libertar(server_id);
-
-            user.removeServidor(server_id);
-            user.addDivida(price);
-
-            out.println("Servidor libertado. Aumento da dívida em: " + price);
-        }
-        else {
-            out.println("Não és dono do servidor: " + server_id);
-        }
-    }
-
-
-    /**
-     * Método que retorna a dívida do utilizador
-     * @return dívida
-     */
+	/**
+	 * Método que retorna a dívida do utilizador
+	 * @return dívida
+	 */
 	private double getDividaUser(){
 		Utilizador u;
 		double value = -1;
@@ -265,38 +156,45 @@ public class ClientHandler implements Runnable{
 		return value;
 	}
 
+	private Utilizador getUser(String str){
+		Utilizador user;
+		synchronized (this.clients){
+			user = clients.get(str);
+		}
+		return user;
+	}
 
-    /**
-     * Função que processa a reserva de um servidor
-     * @param x opção escolhida pelo utilizador para o tipo de servidor
-     * @throws IOException
-     */
-	public void processaReserva(int x) throws IOException {
-        String opt;
-        int op;
-        String server_type;
-        double server_price;
+	private void commandRServer(String msg){
+		String args[] = msg.split(";");
 
-        if(x == 1){server_type = "fast"; server_price = 10.0;}
-        else if (x == 2){server_type = "medium"; server_price = 7.5;}
-        else{server_type = "large"; server_price = 5;}
+		adquirirServidor(Double.parseDouble(args[2]),args[1]);
+	}
 
+	private void adquirirServidor(double price, String type){
+		Utilizador user = this.getUser(this.active_user);
+		ServerTypeManager s = this.stm.get(type);
+		String server_id = s.adquirir(price,user);
 
-        out.println("Deseja reservar: 1 - Preço base (" + server_price + ") | 2 - Preço para leilão");
+		out.println("SERVER AQUIRED: " + server_id);
+	}
 
-        opt = in.readLine();
-        op = Integer.parseInt(opt);
+	private void libertarServidor(String server_id){
+		Utilizador user = this.getUser(this.active_user);
 
-        if(op == 2){
-            out.println("Valor: ");
-            opt = in.readLine();
-            int value = Integer.parseInt(opt);
+        if (user.donoServidor(server_id)){
+            double price = getServerSMT(server_id).libertar(server_id);
 
-            adquirirServidor(value, server_type);
+            user.removeServidor(server_id);
+            user.addDivida(price);
+
+            out.println("SERVER PAYMENT -> " + price);
         }
-        else adquirirServidor(server_price, server_type);
-
+        else {
+            out.println("SERVER NOT OWNED -> " + server_id);
+        }
     }
+
+
 
 
     /**
@@ -304,6 +202,7 @@ public class ClientHandler implements Runnable{
      * @param server_id id do servidor
      * @return ServerTypeManager correspondente
      */
+
     public ServerTypeManager getServerSMT(String server_id){
 	    String server_type = (server_id.split("\\."))[0];
 
