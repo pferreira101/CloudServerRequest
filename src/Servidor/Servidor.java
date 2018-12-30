@@ -1,3 +1,5 @@
+package Servidor;
+
 import java.util.concurrent.locks.*;
 import java.time.*;
 
@@ -41,7 +43,7 @@ public class Servidor{
 
 			LocalDateTime libertado=LocalDateTime.now();
 			Duration duration = Duration.between(adquirido,libertado);
-    		double diff = duration.toSeconds();
+    		double diff = duration.getSeconds();
 
     		paying = this.price*(diff/120);
 
@@ -110,7 +112,7 @@ public class Servidor{
 		@param owner Novo dono do servidor.
 	*/
 
-	public void buyBiddenServer(double price,Utilizador owner){
+	public void buyBiddenServer(double price, Utilizador owner){
 		try{
 			l.lock();
 			this.status = 1;
@@ -118,7 +120,7 @@ public class Servidor{
 
 			LocalDateTime libertado=LocalDateTime.now();
 			Duration duration = Duration.between(adquirido,libertado);
-    		double diff = duration.toSeconds();
+    		double diff = duration.getSeconds();
 			double paying = this.price*(diff/120);
 
 			this.actual_owner.addDivida(paying);
