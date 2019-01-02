@@ -1,5 +1,3 @@
-package Cliente;
-
 import java.util.*;
 import java.io.*;
 import java.net.Socket;

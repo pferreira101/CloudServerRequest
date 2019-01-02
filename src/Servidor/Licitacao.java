@@ -1,5 +1,3 @@
-package Servidor;
-
 public class Licitacao {
 
     private String user;
