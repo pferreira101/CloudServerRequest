@@ -35,7 +35,6 @@ public class ClientHandler implements Runnable{
 				command(msg);
 			}
 
-
         } catch (IOException e){
             System.out.println(e.getMessage());
         }
