@@ -5,6 +5,9 @@ import java.util.concurrent.locks.*;
 import java.net.Socket;
 import java.io.*;
 
+/**
+ * Classe para ordenar a queue de licitações.
+ */
 
 class SortQueueLicitacao implements Comparator<Licitacao>{
 
@@ -15,6 +18,10 @@ class SortQueueLicitacao implements Comparator<Licitacao>{
     }
 
 }
+
+/**
+ * Classe que gere um tipo de servidores.
+ */
 
 public class ServerTypeManager{
 
@@ -41,6 +48,12 @@ public class ServerTypeManager{
 			this.servidores_livres.add(s);
 	}
 
+	/**
+	 * Método para libertar um servidor.
+	 * @param n_server String do servidor a libertar.
+	 * @return Valor a pagar pelo servidor.
+	 */
+
 	public double libertar(String n_server){
 		Servidor server_to_free;
 		double price = 0;
@@ -58,6 +71,13 @@ public class ServerTypeManager{
 		System.out.println(price);
 		return price;
 	}
+
+	/**
+	 * Método para adquirir um servidor por compra.
+	 * @param price Preço da compra.
+	 * @param owner Novo dono.
+	 * @return Nome do servidor adquirido.
+	 */
 
 	public String adquirir(double price, Utilizador owner){
 		String server_id = "";
@@ -93,6 +113,14 @@ public class ServerTypeManager{
 
 		return server_id;
 	}
+
+	/**
+	 * Método para comprar um servidor por licitação.
+	 * @param price Valor a pagar.
+	 * @param user Novo dono.
+	 * @param out Canal para comunicar caso o servidor seja novamente vendido.
+	 * @return Nome do servidor adquirido.
+	 */
 
 	public String licitar(double price, Utilizador user, PrintWriter out){
 		Licitacao proposta;
