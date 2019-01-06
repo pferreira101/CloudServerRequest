@@ -59,7 +59,7 @@ public class ClientHandler implements Runnable{
 			case "FREE": {commandFServer(msg); break;}
 			case "RENT": {commandRServer(msg); break;}
 			case "BID" : {commandBServer(msg); break;}
-			default: {this.out.println("Errro"); break;}
+			default: {this.out.println("Erro"); break;}
 			//falta o disconnect total e tratar das excpetions melhor
 		}
 
@@ -254,7 +254,7 @@ public class ClientHandler implements Runnable{
 		ServerTypeManager s = this.stm.get(type);
 		String server_id = s.adquirir(price,user);
 
-		out.println("SERVER AQUIRED: " + server_id);
+		out.println("SERVER ACQUIRED: " + server_id);
 	}
 
 	/**
