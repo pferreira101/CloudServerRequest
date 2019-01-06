@@ -54,6 +54,7 @@ public class ClientHandler implements Runnable{
 			case "LOGIN": {commandLogin(msg); break;}
 			case "SIGN": {commandSign(msg); break;}
 			case "LOGOUT": {commandLogout(); break;}
+			case "ENDCONNECT": {commandEConnect(); break;}
 			case "MONEY": {commandMoney(); break;}
 			case "OSERVER": {commandOServer(); break;}
 			case "FREE": {commandFServer(msg); break;}
@@ -67,6 +68,8 @@ public class ClientHandler implements Runnable{
 
 		return result;
 	}
+
+
 
 	/**
 	 * Método responsável por comprar um servidor por leilão.
@@ -116,6 +119,13 @@ public class ClientHandler implements Runnable{
 	private void commandLogout(){
 		out.println("USER: " + this.active_user + " -> DISCONNECTED");
 		this.active_user = "";
+	}
+
+	/**
+	 * Método que inicia o processo de término de uma conexão.
+	 */
+	private void commandEConnect() {
+		out.println("END");
 	}
 
 	/**

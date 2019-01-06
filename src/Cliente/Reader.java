@@ -44,6 +44,8 @@ public class Reader implements Runnable{
 			this.in = new BufferedReader(new InputStreamReader(cs.getInputStream()));
 			while((msg = this.in.readLine()) != null){
 				System.out.println(msg);
+				if(msg.equals("END"))
+					l.logout();
 				if (msg.equals("GRANTED"))
 					l.login();
 				if ((!this.warningCheck(msg)) && l.getWaiting()){

@@ -264,7 +264,7 @@ public class Drawer implements Runnable{
 
 		switch(option){
 			case 0:{
-				this.log.logout();
+				server_request("ENDCONNECT");
 				break;
 			}
 			case 1:
@@ -339,6 +339,7 @@ public class Drawer implements Runnable{
 				menu_draw();
 				read_menu_output();
 			}
+			this.cs.close();
 		}
 		catch(IOException e){}
 		catch(InterruptedException a){}
