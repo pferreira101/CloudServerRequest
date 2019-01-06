@@ -43,7 +43,7 @@ public class Servidor{
 			Duration duration = Duration.between(adquirido,libertado);
     		double diff = duration.getSeconds();
 
-    		paying = this.price*(diff/120);
+    		paying = this.price*(diff/3600);
 
 			if (valid)
 				this.bid_steal.signal();
@@ -119,7 +119,7 @@ public class Servidor{
 			LocalDateTime libertado=LocalDateTime.now();
 			Duration duration = Duration.between(adquirido,libertado);
     		double diff = duration.getSeconds();
-			double paying = this.price*(diff/120);
+			double paying = this.price*(diff/3600);
 
 			this.actual_owner.addDivida(paying);
 
