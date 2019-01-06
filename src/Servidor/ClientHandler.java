@@ -2,6 +2,10 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Map;
 
+/**
+ * Classe responsável por intrepertar os pedidos feitos por um cliente ao servidor.
+ */
+
 public class ClientHandler implements Runnable{
     private Socket cs;
     private PrintWriter out;
@@ -35,7 +39,13 @@ public class ClientHandler implements Runnable{
         }
     }
 
-	private void command(String msg){
+	/**
+	 * Método que recebe uma mensagem do cliente e reencaminha para o método correto.
+	 * @param msg Pedido recebido.
+	 * @return Valor booleano se a ligação ao servidor tem que ser cortada.
+	 */
+
+	private boolean command(String msg){
 		String [] args = msg.split(";",2);
 
 		switch(args[0]){
@@ -50,7 +60,16 @@ public class ClientHandler implements Runnable{
 			default: {this.out.println("Errro"); break;}
 			//falta o disconnect total e tratar das excpetions melhor
 		}
+
+		boolean result = args[0].equals("EXIT");
+
+		return result;
 	}
+
+	/**
+	 * Método responsável por comprar um servidor por leilão.
+	 * @param msg Pedido recebido.
+	 */
 
 	private void commandBServer(String msg){
 		String args[] = msg.split(";");
@@ -63,11 +82,20 @@ public class ClientHandler implements Runnable{
 
 	}
 
+	/**
+	 * Método responsável por libertar um servidor.
+	 * @param msg Pedido recebido
+	 */
+
 
 	private void commandFServer(String msg){
 		String[] args = msg.split(";");
 		libertarServidor(args[1]);
 	}
+
+	/**
+	 * Método responsável por obter a lista de servidores que o utilizador obtem.
+	 */
 
 	private void commandOServer(){
 		if (!this.active_user.equals("")){
@@ -79,10 +107,19 @@ public class ClientHandler implements Runnable{
 		}
 	}
 
+	/**
+	 * Método de log out de um utilizador do servidor.
+	 */
+
 	private void commandLogout(){
 		out.println("USER: " + this.active_user + " -> DISCONNECTED");
 		this.active_user = "";
 	}
+
+	/**
+	 * Método reponsável por fazer login de um utilizador.
+	 * @param msg Pedido ao servidor.
+	 */
 
 	private void commandLogin(String msg){
 		String[] args = msg.split(";");
@@ -94,6 +131,11 @@ public class ClientHandler implements Runnable{
 		}
 	}
 
+	/**
+	 * Método reponsável por registar um utilizador.
+	 * @param msg Pedido ao servidor.
+	 */
+
 	private void commandSign(String msg){
 		String[] args = msg.split(";");
 
@@ -103,6 +145,10 @@ public class ClientHandler implements Runnable{
 			default: {out.println("USER ALREADY REGISTED"); break;}
 		}
 	}
+
+	/**
+	 * Método reponsável por verificar a dívida de um utilizador.
+	 */
 
 	private void commandMoney(){
 		double money;
@@ -114,6 +160,13 @@ public class ClientHandler implements Runnable{
 			out.println("USER: " + this.active_user + " -> " + money);
 		}
 	}
+
+	/**
+	 * Método que verifica se as credenciais inseridas são válidades.
+	 * @param user String com o nome do utilizador.
+	 * @param pw String com a password do utilizador.
+	 * @return Permições obtidas.
+	 */
 
 
     private int logIn(String user, String pw){
@@ -127,7 +180,14 @@ public class ClientHandler implements Runnable{
         return 0;
     }
 
-    private int registerClient(String user, String pw) {
+	/**
+	 * Método para registar um utilizador.
+	 * @param user String com o nome do utilizador.
+	 * @param pw String com a password do utilizador.
+	 * @return
+	 */
+
+	private int registerClient(String user, String pw) {
         synchronized (clients){
             if(!this.clients.containsKey(user)){
                 this.clients.put(user, new Utilizador(user, pw));
@@ -156,6 +216,12 @@ public class ClientHandler implements Runnable{
 		return value;
 	}
 
+	/**
+	 * Método utilizado para obter o utilizador pretendido.
+	 * @param str String com o nome do utilizador.
+	 * @return Utilizador pretendido.
+	 */
+
 	private Utilizador getUser(String str){
 		Utilizador user;
 		synchronized (this.clients){
@@ -164,11 +230,22 @@ public class ClientHandler implements Runnable{
 		return user;
 	}
 
+	/**
+	 * Método responsável por intrepertar o comando para reservar um servidor.
+	 * @param msg Pedido ao servidor.
+	 */
+
 	private void commandRServer(String msg){
 		String args[] = msg.split(";");
 
 		adquirirServidor(Double.parseDouble(args[2]),args[1]);
 	}
+
+	/**
+	 * Método para adquirir um servidor.
+	 * @param price Preço da aquisição.
+	 * @param type Tipo de servidor.
+	 */
 
 	private void adquirirServidor(double price, String type){
 		Utilizador user = this.getUser(this.active_user);
@@ -177,6 +254,11 @@ public class ClientHandler implements Runnable{
 
 		out.println("SERVER AQUIRED: " + server_id);
 	}
+
+	/**
+	 * Método para libertar um servidor
+	 * @param server_id String com o identificador do servidor.
+	 */
 
 	private void libertarServidor(String server_id){
 		Utilizador user = this.getUser(this.active_user);

@@ -4,6 +4,10 @@ import java.util.*;
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * Classe responsável por ler a informação proveniente do servidor.
+ */
+
 public class Reader implements Runnable{
 	Socket cs;
 	BufferedReader in;
@@ -14,6 +18,12 @@ public class Reader implements Runnable{
 		this.l = l;
 	}
 
+	/**
+	 * Método que verifica se a resposta é um warning ou não.
+	 * @param msg Resposta recebida.
+	 * @return Valor booleano para a interpretação da resposta.
+	 */
+
 	public boolean warningCheck(String msg){
 		String args [] = msg.split(":");
 
@@ -21,6 +31,10 @@ public class Reader implements Runnable{
 
 		return valid;
 	}
+
+	/**
+	 * Método run que será executado pela thread.
+	 */
 
 	public void run(){
 

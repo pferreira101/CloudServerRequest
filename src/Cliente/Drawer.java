@@ -14,6 +14,10 @@ public class Drawer implements Runnable{
 		this.log = l;
 	}
 
+	/**
+	 * Método usado para desenhar os menus.
+	 */
+
 	public void menu_draw(){
 		switch (this.menu_status){
 			case 0:{
@@ -31,6 +35,12 @@ public class Drawer implements Runnable{
 		}
 	}
 
+	/**
+	 * Método para ler a decisão do cliente em cada menu.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 	public void read_menu_output() throws IOException,InterruptedException{
 		switch (this.menu_status){
 			case 0:
@@ -46,6 +56,11 @@ public class Drawer implements Runnable{
 				break;
 		}
 	}
+
+	/**
+	 * Método para ler um inteiro digitado pelo utilizador.
+	 * @return Valor inteiro introduzido pelo utilizador.
+	 */
 
 	public int readOpt(){
 		int option = -1;
@@ -66,6 +81,11 @@ public class Drawer implements Runnable{
 
 		return option;
 	}
+
+	/**
+	 * Método utilizado para ler um double introduzido pelo utilizador.
+	 * @return Valor double introduzido pelo utilizador.
+	 */
 
 	public double readDouble(){
 		double number = -1;
@@ -91,6 +111,12 @@ public class Drawer implements Runnable{
 		return number;
 	}
 
+	/**
+	 * Método para interpretar a decisão do cliente no menu 3.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 	public void menu_three_output() throws IOException,InterruptedException{
 		int option = this.readOpt();
 
@@ -105,6 +131,13 @@ public class Drawer implements Runnable{
 			}
 		}
 	}
+
+	/**
+	 * Método reponsável pelo pedido ao servidor de uma compra ou licitação de um servidor.
+	 * @param option Tipo do servidor pretendido.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 
 	public void server_rent(int option) throws IOException,InterruptedException{
 		String server_type;
@@ -139,6 +172,12 @@ public class Drawer implements Runnable{
 		this.menu_status--;
 	}
 
+	/**
+	 * Método para interpretar a decisão do cliente no menu 2.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 	public void menu_two_output() throws IOException,InterruptedException{
 		int option = this.readOpt();
 
@@ -154,10 +193,23 @@ public class Drawer implements Runnable{
 		}
 	}
 
+	/**
+	 * Método que emite um pedido ao servidor e espera pela resposta.
+	 * @param msg Pedido a ser enviador.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 	public void server_request(String msg) throws IOException,InterruptedException{
 		this.out.println(msg);
 		this.log.waitresponse();
 	}
+
+	/**
+	 * Método responsável por emitir o pedido para libertar um servidor no menu 2.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 
 	public void menu_two_freeserver() throws IOException,InterruptedException{
 		String result = "OSERVER",msg;
@@ -171,10 +223,22 @@ public class Drawer implements Runnable{
 
 	}
 
+	/**
+	 * Método responsável por emitir o pedido para consultar a dívida do cliente no menu 2.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 	public void menu_two_money() throws IOException,InterruptedException{
 		String result = "MONEY";
 		this.server_request(result);
 	}
+
+	/**
+	 * Método responsável por fazer log out no menu 2.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 
 	public  void menu_two_logout() throws IOException,InterruptedException{
 			this.log.loginoff();
@@ -184,6 +248,12 @@ public class Drawer implements Runnable{
 			this.server_request(result);
 
 	}
+
+	/**
+	 * Método responsável por interpretar a decisão do cliente no menu 1.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 
 
 	public void menu_one_output() throws IOException,InterruptedException{
@@ -209,6 +279,12 @@ public class Drawer implements Runnable{
 
 	}
 
+	/**
+	 * Método para fazer log in no menu 1.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 
 	public void menu_one_login() throws IOException,InterruptedException{
 		String username, password;
@@ -228,6 +304,12 @@ public class Drawer implements Runnable{
 
 	}
 
+	/**
+	 * Método para registar no menu 1.
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+
 	public void menu_one_signup() throws IOException,InterruptedException{
 		String username, password;
 		Scanner is = new Scanner(System.in);
@@ -241,6 +323,10 @@ public class Drawer implements Runnable{
 		this.server_request(result);
 
 	}
+
+	/**
+	 * Método run que é executado pela thread.
+	 */
 
 	public void run(){
 		try{

@@ -118,11 +118,22 @@ public class Utilizador {
 		return b;
 	}
 
+	/**
+	 * Método para obter a lista de Servidores que um utilizador tem.
+	 * @return String com os servidores.
+	 */
+
 
 	public String getOwnedServers(){
 		StringBuilder r = new StringBuilder();
-		for(String s : this.servidores){
-			r.append(s + " | ");
+		try{
+			l.lock();
+			for(String s : this.servidores){
+				r.append(s + " | ");
+			}
+		}
+		finally {
+			l.unlock();
 		}
 		return r.toString();
 	}

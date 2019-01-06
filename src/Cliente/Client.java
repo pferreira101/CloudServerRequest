@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * Classe responsável por ligar um cliente ao servidor.
+ */
 
 public class Client {
     public static void main(String args[]) throws IOException {

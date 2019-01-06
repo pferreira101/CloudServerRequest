@@ -3,6 +3,10 @@ import java.io.*;
 import java.util.concurrent.locks.*;
 import java.net.Socket;
 
+/**
+ * Classe que é responsável por avisar um utilizador quando um dos seus servidores obtidos por leilão é adquirido por outro utilizador.
+ */
+
 public class Bidcheck implements Runnable{
 	private Servidor s;
 	private PrintWriter out;
