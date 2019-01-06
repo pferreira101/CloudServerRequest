@@ -188,7 +188,7 @@ public class Drawer implements Runnable{
 			case 1:{ this.menu_status++; break;}
 			case 2:{ this.menu_two_freeserver(); break;}
 			case 3:{ this.menu_two_money(); break;}
-			case 4:{ this.menu_two_logout();break;}
+			case 4:{ server_request("LOGOUT");;break;}
 			default:{
 				System.out.println("Por favor insira um número das opeções dadas");
 				menu_two_output();
@@ -237,20 +237,6 @@ public class Drawer implements Runnable{
 		this.server_request(result);
 	}
 
-	/**
-	 * Método responsável por fazer log out no menu 2.
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-
-	public  void menu_two_logout() throws IOException,InterruptedException{
-			this.log.loginoff();
-			this.menu_status--;
-
-			String result = "LOGOUT";
-			this.server_request(result);
-
-	}
 
 	/**
 	 * Método responsável por interpretar a decisão do cliente no menu 1.
@@ -264,7 +250,7 @@ public class Drawer implements Runnable{
 
 		switch(option){
 			case 0:{
-				server_request("ENDCONNECT");
+					server_request("LOGOUT");
 				break;
 			}
 			case 1:
