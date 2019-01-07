@@ -288,6 +288,7 @@ public class Drawer implements Runnable{
 		this.server_request(result);
 
 		if(this.log.getLogIn_status()){
+			checkUserMsg(username);
 			this.menu_status++;
 		}
 
@@ -311,6 +312,10 @@ public class Drawer implements Runnable{
 		String result = String.join(";","SIGN",username,password);
 		this.server_request(result);
 
+	}
+
+	private void checkUserMsg(String username){
+		out.println("MSGS;"+username);
 	}
 
 	/**

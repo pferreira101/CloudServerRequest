@@ -58,6 +58,7 @@ public class ClientHandler implements Runnable{
 			case "FREE": {commandFServer(msg); break;}
 			case "RENT": {commandRServer(msg); break;}
 			case "BID" : {commandBServer(msg); break;}
+			case "MSGS" : {commandMSG(); break;}
 			default: {this.out.println("Erro"); break;}
 			//falta o disconnect total e tratar das excpetions melhor
 		}
@@ -68,6 +69,11 @@ public class ClientHandler implements Runnable{
 	}
 
 
+	private void commandMSG(){
+		Utilizador user = this.getUser(this.active_user);
+		if(user.hasMsgs())
+			out.println(user.getMsgs());
+	}
 
 	/**
 	 * Método responsável por comprar um servidor por leilão.
@@ -116,6 +122,11 @@ public class ClientHandler implements Runnable{
 	 * Método que inicia o processo de término de uma conexão.
 	 */
 	private void commandLogout() {
+		if (this.active_user != "") {
+			synchronized (this.clients) {
+				(this.clients.get(this.active_user)).setStatus(0);
+			}
+		}
 		out.println("END");
 	}
 
@@ -177,6 +188,7 @@ public class ClientHandler implements Runnable{
         synchronized (clients){
             if(this.clients.containsKey(user) && this.clients.get(user).authenticate(pw)){
                 this.active_user = user;
+				(this.clients.get(user)).setStatus(1);
 				return 1;
 			}
         }

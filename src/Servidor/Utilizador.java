@@ -9,6 +9,8 @@ public class Utilizador {
 	private double divida;
 	private Lock l;
 	private List<String> servidores;
+	private int status;
+	List<String> msgBox;
 
 	/**
 		Construtor da class Utilizador
@@ -23,6 +25,7 @@ public class Utilizador {
 		this.divida = 0.0;
 		this.servidores = new ArrayList<>();
 		this.l = new ReentrantLock();
+		msgBox = new ArrayList<>();
 	}
 
 	/**
@@ -138,5 +141,54 @@ public class Utilizador {
 			l.unlock();
 		}
 		return r.toString();
+	}
+
+	public int getStatus() {
+		int status;
+		try{
+			l.lock();
+			status = this.status;
+		}
+		finally{
+			l.unlock();
+		}
+
+		return status;
+	}
+
+	public void setStatus(int s){
+		try{
+			l.lock();
+			this.status = s;
+		}
+		finally{
+			l.unlock();
+		}
+	}
+
+
+	public void addMsg(String s) {
+		try{
+			l.lock();
+			this.msgBox.add(s);
+		}
+		finally{
+			l.unlock();
+		}
+	}
+
+	public List<String> getMsgs(){
+		try{
+			l.lock();
+			return new ArrayList<String>(this.msgBox);
+		}
+		finally{
+			this.msgBox.clear();
+			l.unlock();
+		}
+	}
+
+	public boolean hasMsgs(){
+		return this.msgBox.size()>0 ;
 	}
 }

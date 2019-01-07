@@ -145,7 +145,7 @@ public class ServerTypeManager{
 			user.addServidor(server_id); // adicionar o servidor ao utilizador
 			livre.signalAll();
 
-			Thread t = new Thread(new Bidcheck(s,out));
+			Thread t = new Thread(new Bidcheck(s,out, user));
 			t.start();
 
 		}

@@ -12,10 +12,12 @@ import java.net.Socket;
 public class Bidcheck implements Runnable{
 	private Servidor s;
 	private PrintWriter out;
+	private Utilizador u;
 
-	public Bidcheck(Servidor s,PrintWriter out){
+	public Bidcheck(Servidor s,PrintWriter out, Utilizador u){
 		this.s = s;
 		this.out = out;
+		this.u = u;
 	}
 
 	public void run(){
@@ -24,7 +26,10 @@ public class Bidcheck implements Runnable{
 			boolean valid = s.warningAfterBid();
 
 			if (valid){
-				this.out.println("WARNING: " + s.getID() + " WAS SOLD TO OTHER USER");
+				String id = s.getID();
+				if(u.getStatus() == 1)
+					this.out.println("WARNING: " + id + " WAS SOLD TO OTHER USER");
+				else u.addMsg("WARNING: " + id + " WAS SOLD TO OTHER USER");
 			}
 
 		}
