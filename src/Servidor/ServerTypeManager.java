@@ -1,5 +1,3 @@
-package Servidor;
-
 import java.util.*;
 import java.util.concurrent.locks.*;
 import java.net.Socket;

@@ -1,4 +1,3 @@
-package Servidor;
 
 import java.io.*;
 import java.net.Socket;
@@ -14,7 +13,7 @@ public class ClientHandler implements Runnable{
     private BufferedReader in;
     private Map<String, Utilizador> clients;
 	private Map<String, ServerTypeManager> stm;
-    private String active_user; // Coloquei isto porque quem trata do utilizador tem que saber qual ele é e isso só acontece apos o login
+    private Utilizador active_user; // Coloquei isto porque quem trata do utilizador tem que saber qual ele é e isso só acontece apos o login
 
 
     public ClientHandler(Socket cs, Map<String, Utilizador> clients, Map<String, ServerTypeManager> stm) {
@@ -38,6 +37,7 @@ public class ClientHandler implements Runnable{
         } catch (IOException e){
             System.out.println(e.getMessage());
         }
+		System.out.println("sai");
     }
 
 	/**
@@ -70,9 +70,8 @@ public class ClientHandler implements Runnable{
 
 
 	private void commandMSG(){
-		Utilizador user = this.getUser(this.active_user);
-		if(user.hasMsgs())
-			out.println(user.getMsgs());
+		if(this.active_user.hasMsgs())
+			out.println(this.active_user.getMsgs());
 	}
 
 	/**
@@ -83,9 +82,8 @@ public class ClientHandler implements Runnable{
 	private void commandBServer(String msg){
 		String args[] = msg.split(";");
 
-		Utilizador user = this.getUser(this.active_user);
 		ServerTypeManager s = this.stm.get(args[1]);
-		String server_id = s.licitar(Double.parseDouble(args[2]),user,this.out);
+		String server_id = s.licitar(Double.parseDouble(args[2]),this.active_user,this.out);
 
 		out.println("SERVER AQUIRED: " + server_id);
 
@@ -107,9 +105,8 @@ public class ClientHandler implements Runnable{
 	 */
 
 	private void commandOServer(){
-		if (!this.active_user.equals("")){
-			Utilizador u = this.getUser(this.active_user);
-			out.println("OWNED SERVERS: " + u.getOwnedServers());
+		if (this.active_user != null){
+			out.println("OWNED SERVERS: " + this.active_user.getOwnedServers());
 		}
 		else{
 			out.println("DENIED");
@@ -122,10 +119,8 @@ public class ClientHandler implements Runnable{
 	 * Método que inicia o processo de término de uma conexão.
 	 */
 	private void commandLogout() {
-		if (this.active_user != "") {
-			synchronized (this.clients) {
-				(this.clients.get(this.active_user)).setStatus(0);
-			}
+		if (this.active_user != null) {
+			this.active_user.setStatus(0);
 		}
 		out.println("END");
 	}
@@ -140,7 +135,7 @@ public class ClientHandler implements Runnable{
 
 		int i = logIn(args[1],args[2]);
 		switch (i){
-			case 1: {out.println("GRANTED"); this.active_user = args[1];break;}
+			case 1: {out.println("GRANTED"); this.active_user = getUser(args[1]);break;}
 			default: {out.println("DENIED"); break;}
 		}
 	}
@@ -166,12 +161,12 @@ public class ClientHandler implements Runnable{
 
 	private void commandMoney(){
 		double money;
-		if (this.active_user.equals("")){
+		if (this.active_user == null){
 			out.println("DENIED");
 		}
 		else{
 			money = this.getDividaUser();
-			out.println("USER: " + this.active_user + " -> " + money);
+			out.println("USER: " + this.active_user.getUsername() + " -> " + money);
 		}
 	}
 
@@ -187,8 +182,8 @@ public class ClientHandler implements Runnable{
 		Utilizador util;
         synchronized (clients){
             if(this.clients.containsKey(user) && this.clients.get(user).authenticate(pw)){
-                this.active_user = user;
-				(this.clients.get(user)).setStatus(1);
+                this.active_user = this.clients.get(user);
+				this.active_user.setStatus(1);
 				return 1;
 			}
         }
@@ -217,15 +212,11 @@ public class ClientHandler implements Runnable{
 	 * @return dívida
 	 */
 	private double getDividaUser(){
-		Utilizador u;
 		double value = -1;
 
-		synchronized (this.clients) {
-			u = clients.get(this.active_user);
-		}
 
-		if (u != null){
-			value = u.getDivida();
+		if (this.active_user != null){
+			value = this.active_user.getDivida();
 		}
 
 		return value;
@@ -263,9 +254,8 @@ public class ClientHandler implements Runnable{
 	 */
 
 	private void adquirirServidor(double price, String type){
-		Utilizador user = this.getUser(this.active_user);
 		ServerTypeManager s = this.stm.get(type);
-		String server_id = s.adquirir(price,user);
+		String server_id = s.adquirir(price,this.active_user);
 
 		out.println("SERVER ACQUIRED: " + server_id);
 	}
@@ -276,13 +266,12 @@ public class ClientHandler implements Runnable{
 	 */
 
 	private void libertarServidor(String server_id){
-		Utilizador user = this.getUser(this.active_user);
 
-        if (user.donoServidor(server_id)){
+        if (this.active_user.donoServidor(server_id)){
             double price = getServerSMT(server_id).libertar(server_id);
 
-            user.removeServidor(server_id);
-            user.addDivida(price);
+            this.active_user.removeServidor(server_id);
+            this.active_user.addDivida(price);
 
             out.println("SERVER PAYMENT -> " + price);
         }
